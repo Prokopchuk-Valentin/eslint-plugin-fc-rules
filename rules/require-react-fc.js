@@ -2,7 +2,7 @@ module.exports = {
   meta: {
     type: 'problem',
     docs: {
-      description: 'Require explicit return type as React.FC for functions returning JSX',
+      description: 'Require explicit return type as React.FC for arrow functions returning JSX',
       category: 'Best Practices',
       recommended: false,
     },
@@ -21,7 +21,7 @@ module.exports = {
     ],
     fixable: 'code',
     messages: {
-      missingFC: 'Function returning JSX must explicitly declare its type as React.FC.',
+      missingFC: 'Arrow function returning JSX must explicitly declare its type as React.FC.',
     },
   },
   create(context) {
@@ -35,11 +35,8 @@ module.exports = {
           checkNode(node, context)
         }
       },
-      FunctionDeclaration(node) {
-        checkNode(node, context)
-      },
       ExportDefaultDeclaration(node) {
-        if (node.declaration.type === 'ArrowFunctionExpression' || node.declaration.type === 'FunctionDeclaration') {
+        if (node.declaration.type === 'ArrowFunctionExpression') {
           checkNode(node.declaration, context)
         }
       },
@@ -66,8 +63,18 @@ module.exports = {
         node: variableId,
         messageId: 'missingFC',
         fix: fixer => {
+          const fixes = []
           const name = variableId.name
-          return fixer.insertTextAfter(variableId, `: React.FC`)
+
+          fixes.push(fixer.insertTextAfter(variableId, `: FC`))
+
+          if (!isReactImported()) {
+            fixes.push(fixer.insertTextBefore(sourceCode.ast, `import { FC } from 'react';\n`))
+          } else if (!isFCImported()) {
+            fixes.push(addFCToReactImport(fixer))
+          }
+
+          return fixes
         },
       })
     }
@@ -104,6 +111,38 @@ module.exports = {
 
     function isPascalCase(name) {
       return /^[A-Z][\w\d]*$/.test(name)
+    }
+
+    function isReactImported() {
+      return sourceCode.ast.body.some(
+        node =>
+          node.type === 'ImportDeclaration' &&
+          node.source.value === 'react' &&
+          node.specifiers.some(
+            specifier => specifier.type === 'ImportDefaultSpecifier' && specifier.local.name === 'React',
+          ),
+      )
+    }
+
+    function isFCImported() {
+      return sourceCode.ast.body.some(
+        node =>
+          node.type === 'ImportDeclaration' &&
+          node.source.value === 'react' &&
+          node.specifiers.some(specifier => specifier.type === 'ImportSpecifier' && specifier.imported.name === 'FC'),
+      )
+    }
+
+    function addFCToReactImport(fixer) {
+      const reactImport = sourceCode.ast.body.find(
+        node => node.type === 'ImportDeclaration' && node.source.value === 'react',
+      )
+
+      if (reactImport) {
+        const lastSpecifier = reactImport.specifiers[reactImport.specifiers.length - 1]
+        return fixer.insertTextAfter(lastSpecifier, `, FC`)
+      }
+      return null
     }
   },
 }

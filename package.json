@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-require-react-fc",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "An ESLint plugin to enforce explicit React.FC return types for functions returning JSX.",
   "main": "index.js",
   "type": "commonjs",

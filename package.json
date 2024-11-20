@@ -1,0 +1,31 @@
+{
+  "name": "eslint-plugin-require-react-fc",
+  "version": "1.0.0",
+  "description": "An ESLint plugin to enforce explicit React.FC return types for functions returning JSX.",
+  "main": "index.js",
+  "type": "commonjs",
+  "keywords": [
+    "eslint",
+    "eslint-plugin",
+    "react",
+    "typescript",
+    "jsx",
+    "fc"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Prokopchuk-Valentin/eslint-plugin-require-react-fc.git"
+  },
+  "author": "Prokopchuk Valentin prokopchukvalentindev@gmail.com",
+  "license": "MIT",
+  "scripts": {
+    "test": "eslint ."
+  },
+  "dependencies": {},
+  "peerDependencies": {
+    "eslint": "^8.0.0"
+  },
+  "eslintConfig": {
+    "extends": ["eslint:recommended"]
+  }
+}
